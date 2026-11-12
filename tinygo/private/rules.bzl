@@ -41,7 +41,6 @@ def _tinygo_binary(ctx):
     args = [
         toolchain.tinygo,
         "build",
-        "-x",
         "-o",
         ctx.outputs.out.path,
     ]
