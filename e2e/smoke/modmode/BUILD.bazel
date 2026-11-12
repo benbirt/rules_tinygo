@@ -1,8 +1,8 @@
 load("@rules_tinygo//tinygo:defs.bzl", "tinygo_binary")
 
-# Module mode with a go.mod that is not at the workspace root. The go command
-# downloads the dependency, so this is the one target here that needs the
-# network; the rule requests it.
+# Deprecated module mode, covered until it is removed, with a go.mod that is
+# not at the workspace root. The go command downloads the dependency, so this
+# is the one target here that needs the network; the rule requests it.
 tinygo_binary(
     name = "modmode",
     srcs = ["main.go"],

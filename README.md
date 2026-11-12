@@ -76,8 +76,34 @@ target = "wasi",
 | `embed`               | `go_library` targets and their dependencies, through Bazel | No      |
 | `importpath` + `mod`  | The Go module proxy, as pinned by `go.mod` and `go.sum`    | Yes     |
 
-Prefer `embed`: it uses the dependency versions Bazel resolved (for example
+Use `embed`: it uses the dependency versions Bazel resolved (for example
 through Gazelle's `go_deps`) and never leaves the sandbox.
+
+`importpath` + `mod` (module mode) is deprecated and prints a warning. It
+downloads dependencies during the build, outside Bazel's cache, and ignores
+any patches or overrides applied to the Bazel copies. To migrate, declare the
+main package as a `go_library` and pass it in `embed`; `importpath`, `mod`,
+`sum` and `package_dir` can then be removed:
+
+```starlark
+go_library(
+    name = "app_lib",
+    srcs = ["main.go"],
+    importpath = "example.com/app",
+    deps = ["@com_github_google_uuid//:uuid"],
+)
+
+tinygo_binary(
+    name = "app",
+    out = "app.wasm",
+    embed = [":app_lib"],
+    target = "wasip1",
+)
+```
+
+With `embed` there is no `go.mod` in play, so the `go` directive does not
+select a language version: code is compiled with the semantics of the Go SDK
+in use.
 
 The Go SDK is the one rules_go resolves for the execution platform, so it
 follows the SDK your root module registers. Each TinyGo release supports a

@@ -14,9 +14,16 @@ tinygo_binary(<a href="#tinygo_binary-name">name</a>, <a href="#tinygo_binary-em
 
 Builds a TinyGo binary.
 
-When `embed` is set (like `go_binary`), a hidden `go_path` target materializes
-the embedded library and its transitive dependencies, and TinyGo builds from
-that tree in GOPATH mode: no go.mod and no network access.
+Set `embed` to `go_library` targets, like `go_binary`. A hidden `go_path`
+target materializes them and their transitive dependencies, and TinyGo builds
+from that tree in GOPATH mode: no go.mod and no network access.
+
+For a program that imports only the standard library, `srcs` alone is enough.
+
+Building by `importpath` against a go.mod (module mode) is deprecated: the go
+command downloads the dependencies during the build instead of using the ones
+Bazel resolved. To migrate, declare the main package as a `go_library` and
+pass it in `embed`; `importpath`, `mod`, `sum` and `package_dir` can then go.
 
 
 **PARAMETERS**
@@ -26,8 +33,8 @@ that tree in GOPATH mode: no go.mod and no network access.
 | :------------- | :------------- | :------------- |
 | <a id="tinygo_binary-name"></a>name |  Target name.   |  none |
 | <a id="tinygo_binary-embed"></a>embed |  go_library targets to embed, like go_binary.   |  `None` |
-| <a id="tinygo_binary-mod"></a>mod |  go.mod label for importpath (module-mode) builds; ignored when embed is set.   |  `None` |
-| <a id="tinygo_binary-sum"></a>sum |  Optional go.sum label for importpath builds; ignored when embed is set.   |  `None` |
+| <a id="tinygo_binary-mod"></a>mod |  Deprecated: use embed. go.mod label for importpath builds; ignored when embed is set.   |  `None` |
+| <a id="tinygo_binary-sum"></a>sum |  Deprecated: use embed. go.sum label for importpath builds; ignored when embed is set.   |  `None` |
 | <a id="tinygo_binary-kwargs"></a>kwargs |  Remaining attributes passed to the underlying tinygo_binary rule.   |  none |
 
 

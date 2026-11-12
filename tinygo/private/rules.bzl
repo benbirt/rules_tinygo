@@ -76,8 +76,12 @@ def _tinygo_binary(ctx):
         extra_inputs = gopath[DefaultInfo].files.to_list()
         args.append(importpath)
     elif importpath:
-        # Module mode: the go command downloads the module's dependencies, so
-        # this is the one mode that needs the network.
+        # Module mode, deprecated: the go command downloads the module's
+        # dependencies, so this is the one mode that needs the network.
+        # buildifier: disable=print
+        print(("{}: importpath, mod, sum and package_dir are deprecated and will be removed. " +
+               "They make the go command download dependencies during the build. " +
+               "Use embed with go_library targets instead, which builds offline.").format(ctx.label))
         mod_inputs = [ctx.file.mod]
         env["BUILDER_GOMOD"] = ctx.file.mod.path
         if ctx.file.sum:
@@ -137,23 +141,22 @@ tinygo_binary = rule(
         ),
         "srcs": attr.label_list(
             allow_files = [".go"],
-            doc = "Source files to compile. With importpath, main-package sources copied into package_dir.",
+            doc = "Source files to compile, for programs that import only the standard library. Use embed for anything else.",
         ),
         "importpath": attr.string(
-            doc = "Import path of the main package to build in module mode. Requires mod. " +
-                  "The go command downloads the module's dependencies, so the action needs network access; " +
-                  "prefer embed, which builds offline from Bazel's dependency graph.",
+            doc = "Deprecated: use embed. Import path of the main package to build in module mode. Requires mod. " +
+                  "The go command downloads the module's dependencies, so the action needs network access.",
         ),
         "package_dir": attr.string(
-            doc = "Module-relative directory for srcs when building importpath with local sources.",
+            doc = "Deprecated: use embed. Module-relative directory for srcs when building importpath with local sources.",
         ),
         "mod": attr.label(
             allow_single_file = [".mod"],
-            doc = "go.mod file for module-mode builds.",
+            doc = "Deprecated: use embed. go.mod file for module-mode builds.",
         ),
         "sum": attr.label(
             allow_single_file = [".sum"],
-            doc = "go.sum file for module-mode builds.",
+            doc = "Deprecated: use embed. go.sum file for module-mode builds.",
         ),
         "scheduler": attr.string(
             doc = "Optional TinyGo scheduler, e.g. \"none\".",
