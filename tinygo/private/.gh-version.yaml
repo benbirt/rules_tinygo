@@ -6,6 +6,7 @@ versions:
   - 0.41.1
 release_mapping: v{version}
 asset_mapping:
+  darwin-amd64: tinygo(.+).darwin-amd64.tar.gz
   darwin-arm64: tinygo(.+).darwin-arm64.tar.gz
   linux-amd64: tinygo(.+).linux-amd64.tar.gz
   linux-arm64: tinygo(.+).linux-arm64.tar.gz

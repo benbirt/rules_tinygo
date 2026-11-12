@@ -8,6 +8,7 @@ asset_mapping:
   aarch64-linux: binaryen-version_(.+)-aarch64-linux.tar.gz$
   arm64-macos: binaryen-version_(.+)-arm64-macos.tar.gz$
   x86_64-linux: binaryen-version_(.+)-x86_64-linux.tar.gz$
+  x86_64-macos: binaryen-version_(.+)-x86_64-macos.tar.gz$
 cache:
   "117":
     binaryen-version_117-aarch64-linux.tar.gz: sha384-jNlDOlY9P1XSBG3MShpEH5ukoUMVaHqsHB7zvwo7QCxBEhzCPNqnskkUlWsCy/W2
