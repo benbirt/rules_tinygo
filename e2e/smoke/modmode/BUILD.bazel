@@ -1,0 +1,16 @@
+load("@rules_tinygo//tinygo:defs.bzl", "tinygo_binary")
+
+# Module mode with a go.mod that is not at the workspace root. The go command
+# downloads the dependency, so this is the one target here that needs the
+# network; the rule requests it.
+tinygo_binary(
+    name = "modmode",
+    srcs = ["main.go"],
+    out = "modmode.wasm",
+    importpath = "example.com/modmode/cmd/modmode",
+    mod = "go.mod",
+    package_dir = "cmd/modmode",
+    sum = "go.sum",
+    target = "wasip1",
+    visibility = ["//:__pkg__"],
+)

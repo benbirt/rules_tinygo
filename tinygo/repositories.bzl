@@ -78,11 +78,12 @@ tinygo_toolchain(
     libs = [":lib"],
     targets = [":targets"],
     tools = [":tools"],
+    version = "@VERSION@",
 )
 """
 
     # Base BUILD file for this repository
-    repository_ctx.file("BUILD.bazel", build_content)
+    repository_ctx.file("BUILD.bazel", build_content.replace("@VERSION@", repository_ctx.attr.tinygo_version))
 
 tinygo_repositories = repository_rule(
     _tinygo_repo_impl,

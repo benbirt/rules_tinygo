@@ -4,6 +4,7 @@ The rules for TinyGo.
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_go//go:def.bzl", "GoInfo", "GoPath", "GoSDK")
+load(":go_sdk.bzl", "check_go_version")
 
 def _tinygo_binary(ctx):
     srcs = ctx.files.srcs
@@ -30,6 +31,13 @@ def _tinygo_binary(ctx):
     binaryen = ctx.toolchains["@rules_tinygo//binaryen:toolchain_type"]
     toolchain = ctx.toolchains["@rules_tinygo//tinygo:toolchain_type"]
 
+    # TinyGo runs the go command as a build tool, so the SDK comes from the exec
+    # configuration unless the target names one.
+    sdk = (ctx.attr.go_sdk or ctx.attr._go_sdk)[GoSDK]
+    error = check_go_version(getattr(toolchain, "version", ""), sdk.version)
+    if error:
+        fail("tinygo_binary: {}. Register a supported Go SDK with rules_go, or pick another TinyGo version.".format(error))
+
     args = [
         toolchain.tinygo,
         "build",
@@ -37,6 +45,9 @@ def _tinygo_binary(ctx):
         "-o",
         ctx.outputs.out.path,
     ]
+
+    if not ctx.attr.debug:
+        args.append("-no-debug")
 
     if ctx.attr.target:
         args += ["-target", ctx.attr.target]
@@ -47,13 +58,12 @@ def _tinygo_binary(ctx):
     if ctx.attr.buildmode:
         args += ["-buildmode", ctx.attr.buildmode]
 
-    sdk = ctx.attr.go_sdk[GoSDK]
     mod_inputs = []
     extra_inputs = []
     env = {
         "BUILDER_GOROOT": sdk.root_file.dirname,
         "BUILDER_GOBIN_PATH": sdk.go.dirname,
-        "BUILDER_HOME": ctx.outputs.out.path + ".home",
+        "BUILDER_SCRATCH": ctx.outputs.out.path + ".scratch",
         "BUILDER_TINYGOROOT": paths.dirname(paths.dirname(toolchain.tinygo)),
         "WASMOPT": binaryen.wasm_opt.path,
     }
@@ -66,14 +76,13 @@ def _tinygo_binary(ctx):
         extra_inputs = gopath[DefaultInfo].files.to_list()
         args.append(importpath)
     elif importpath:
-        mod = ctx.file.mod
-        mod_inputs = [mod]
+        # Module mode: the go command downloads the module's dependencies, so
+        # this is the one mode that needs the network.
+        mod_inputs = [ctx.file.mod]
+        env["BUILDER_GOMOD"] = ctx.file.mod.path
         if ctx.file.sum:
             mod_inputs.append(ctx.file.sum)
-        mod_dir = paths.dirname(mod.path)
-        if mod_dir == "":
-            mod_dir = "."
-        env["BUILDER_GOMOD_DIR"] = mod_dir
+            env["BUILDER_GOSUM"] = ctx.file.sum.path
         args.append(importpath)
         execution_requirements["requires-network"] = "1"
         if srcs:
@@ -106,6 +115,8 @@ def _tinygo_binary(ctx):
         outputs = [ctx.outputs.out],
         env = env,
         execution_requirements = execution_requirements,
+        mnemonic = "TinyGoBuild",
+        progress_message = "TinyGo building %{output}",
     )
 
     return [DefaultInfo(
@@ -129,7 +140,9 @@ tinygo_binary = rule(
             doc = "Source files to compile. With importpath, main-package sources copied into package_dir.",
         ),
         "importpath": attr.string(
-            doc = "Import path of the main package to build in module mode. Requires mod.",
+            doc = "Import path of the main package to build in module mode. Requires mod. " +
+                  "The go command downloads the module's dependencies, so the action needs network access; " +
+                  "prefer embed, which builds offline from Bazel's dependency graph.",
         ),
         "package_dir": attr.string(
             doc = "Module-relative directory for srcs when building importpath with local sources.",
@@ -151,13 +164,23 @@ tinygo_binary = rule(
         "target": attr.string(
             doc = "Target architecture.",
         ),
+        "debug": attr.bool(
+            default = False,
+            doc = "Keep debug information. TinyGo records absolute paths in it, and Bazel runs each " +
+                  "action in a differently named sandbox, so a binary with debug information is not " +
+                  "reproducible. Off by default.",
+        ),
         "out": attr.output(
             doc = "Output binary.",
         ),
         "go_sdk": attr.label(
-            doc = "Go SDK to use.",
+            doc = "Go SDK to use. Defaults to the SDK that rules_go resolves for the execution platform.",
             providers = [GoSDK],
-            default = Label("@go_default_sdk//:go_sdk"),
+        ),
+        "_go_sdk": attr.label(
+            default = Label("//tinygo/private:exec_go_sdk"),
+            providers = [GoSDK],
+            cfg = "exec",
         ),
         "_builder": attr.label(
             default = Label("@rules_tinygo//tinygo/builder:builder"),

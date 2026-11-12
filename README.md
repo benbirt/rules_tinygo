@@ -66,6 +66,28 @@ out = "hello.wasi",
 target = "wasi",
 )
 
+## Build modes and hermeticity
+
+`tinygo_binary` builds in one of three ways:
+
+| Attributes            | Where packages come from                                   | Network |
+| :-------------------- | :--------------------------------------------------------- | :------ |
+| `srcs`                | The listed files and the standard library                  | No      |
+| `embed`               | `go_library` targets and their dependencies, through Bazel | No      |
+| `importpath` + `mod`  | The Go module proxy, as pinned by `go.mod` and `go.sum`    | Yes     |
+
+Prefer `embed`: it uses the dependency versions Bazel resolved (for example
+through Gazelle's `go_deps`) and never leaves the sandbox.
+
+The Go SDK is the one rules_go resolves for the execution platform, so it
+follows the SDK your root module registers. Each TinyGo release supports a
+range of Go versions; an SDK outside it is reported when the target is
+analyzed.
+
+Debug information is stripped unless `debug = True`. TinyGo records absolute
+paths in it, and those differ from one sandbox to the next, so a binary with
+debug information is not reproducible.
+
 # Rules
 
 <a id="tinygo_binary"></a>

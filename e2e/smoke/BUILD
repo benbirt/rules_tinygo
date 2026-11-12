@@ -15,6 +15,7 @@ build_test(
         # targets you add above
         ":empty",
         "//embed/hello",
+        "//modmode",
     ],
 )
 

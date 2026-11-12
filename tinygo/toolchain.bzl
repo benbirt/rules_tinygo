@@ -1,27 +1,18 @@
 """This module implements the language-specific toolchain rule."""
 
-# Avoid using non-normalized paths (workspace/../other_workspace/path)
-def _to_manifest_path(ctx, file):
-    if file.short_path.startswith("../"):
-        return "external/" + file.short_path[3:]
-    else:
-        return ctx.workspace_name + "/" + file.short_path
-
 def _tinygo_toolchain_impl(ctx):
-    tool_files = []
-    tinygo_cmd = None
-
+    tinygo = None
     for f in ctx.files.tools:
         if f.path.endswith("bin/tinygo"):
-            tool_files.append(f)
-            tinygo_cmd = _to_manifest_path(ctx, f)
+            tinygo = f
             break
-    if not tinygo_cmd:
+    if not tinygo:
         fail("tinygo not found in tools")
 
     return [platform_common.ToolchainInfo(
-        tool_files = tool_files,
-        tinygo = tinygo_cmd,
+        tool_files = [tinygo],
+        tinygo = tinygo.path,
+        version = ctx.attr.version,
         srcs = ctx.files.srcs,
         targets = ctx.files.targets,
         libs = ctx.files.libs,
@@ -34,6 +25,9 @@ tinygo_toolchain = rule(
         "srcs": attr.label_list(mandatory = True),
         "targets": attr.label_list(mandatory = True),
         "libs": attr.label_list(mandatory = True),
+        "version": attr.string(
+            doc = "TinyGo release, e.g. \"0.42.0\". Used to check that the Go SDK is one this release supports.",
+        ),
     },
     doc = """Defines a tinygo compiler/runtime toolchain.
 

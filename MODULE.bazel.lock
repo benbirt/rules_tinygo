@@ -250,10 +250,17 @@
   "moduleExtensions": {
     "//binaryen:extensions.bzl%binaryen": {
       "general": {
-        "bzlTransitiveDigest": "OKQNfeP8p6a3V3NZT3WOnTpduNVZPqGZ2sJSFiA/86g=",
+        "bzlTransitiveDigest": "Y928w73YbTvdLKTDtIRN8lC5PO2KCH40LE6wu+5Ra8E=",
         "usagesDigest": "CNOSH6vjNdPNTei36tDnRJnmWUjq6QWZG/Ov/bkq+ek=",
         "recordedInputs": [],
         "generatedRepoSpecs": {
+          "binaryen_x86_64-macos": {
+            "repoRuleId": "@@//binaryen:repositories.bzl%binaryen_repositories",
+            "attributes": {
+              "platform": "x86_64-macos",
+              "binaryen_version": "123"
+            }
+          },
           "binaryen_arm64-macos": {
             "repoRuleId": "@@//binaryen:repositories.bzl%binaryen_repositories",
             "attributes": {
@@ -286,7 +293,7 @@
     },
     "//tinygo:extensions.bzl%tinygo": {
       "general": {
-        "bzlTransitiveDigest": "tLNJ0zDEvOEzVasF6tTnacGwV8mv3govW1YOcmvp/7k=",
+        "bzlTransitiveDigest": "gyU3xqtfjtJP6jnXQpq0eA4moSZqRumyuqLUAYy/Tlw=",
         "usagesDigest": "1kp11fI1WZJ92QXtiZQMuc/Om/xRv8GCKnWWrkdtfm0=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
