@@ -15,7 +15,8 @@ tinygo_binary(<a href="#tinygo_binary-name">name</a>, <a href="#tinygo_binary-em
 Builds a TinyGo binary.
 
 When `embed` is set (like `go_binary`), a hidden `go_path` target materializes
-the embedded library and its transitive dependencies for module-mode TinyGo.
+the embedded library and its transitive dependencies, and TinyGo builds from
+that tree in GOPATH mode: no go.mod and no network access.
 
 
 **PARAMETERS**
@@ -25,8 +26,8 @@ the embedded library and its transitive dependencies for module-mode TinyGo.
 | :------------- | :------------- | :------------- |
 | <a id="tinygo_binary-name"></a>name |  Target name.   |  none |
 | <a id="tinygo_binary-embed"></a>embed |  go_library targets to embed, like go_binary.   |  `None` |
-| <a id="tinygo_binary-mod"></a>mod |  Module root go.mod label; required when embed is set.   |  `None` |
-| <a id="tinygo_binary-sum"></a>sum |  Optional go.sum label for the module root.   |  `None` |
+| <a id="tinygo_binary-mod"></a>mod |  go.mod label for importpath (module-mode) builds; ignored when embed is set.   |  `None` |
+| <a id="tinygo_binary-sum"></a>sum |  Optional go.sum label for importpath builds; ignored when embed is set.   |  `None` |
 | <a id="tinygo_binary-kwargs"></a>kwargs |  Remaining attributes passed to the underlying tinygo_binary rule.   |  none |
 
 
